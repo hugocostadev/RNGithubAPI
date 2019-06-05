@@ -4,86 +4,133 @@ import {
   View,
   FlatList,
   ActivityIndicator,
+  Button,
   StyleSheet
 } from "react-native";
-import { Input } from "react-native-elements";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import CardRepositorio from "../components/CardRepositorio";
+
+import { Input } from "react-native-elements";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 export default class Repos extends Component {
   constructor() {
     super();
     this.state = {
-      searchString: ""
+      searchTerm: ""
     };
   }
 
   render() {
     return (
-      <View>
+      <View style={{flex: 1}}>
         <Input
-          onChangeText={searchString => this.setState({ searchString })}
-          placeholder="INPUT WITH CUSTOM ICON"
+          value={this.state.searchTerm}
+          onChangeText={searchTerm => this.setState({ searchTerm })}
+          placeholder="Filtrar por nome"
           leftIcon={<Icon name="magnify" size={24} color="black" />}
         />
 
-        <ReposList searchString={this.state.searchString} />
+        <ReposList filtroString={this.state.searchTerm}/>
       </View>
     );
   }
 }
 
 class ReposList extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
-      repositorios: []
+      repositorios: [],
+      erro: false
     };
+  }
 
-    
-    if(this.props.searchString){
-        console.log(this.props.searchString.split().length > 3);
-        if (this.props.searchString.split().length > 3) {
-          getRepositorios(this.props.searchString);
-        }
+  getRepositorios = async (e) => {
+    this.setState({ erro: false });
+    try {
+      const resposta = await fetch("https://api.github.com/repositories");
+      const repos = await resposta.json();
+      console.log("Resposta", resposta);
+      console.log("JSON", repos);
 
+      this.setState({ repositorios: repos, erro: false });
+    } catch (e) {
+      this.setState({ repositorios: [], erro: true });
+      console.log("error: ", e);
+      console.log(this.state.erro);
     }
-  }
-
-  getRepositorios(searchTerm) {
-    this._get(
-      `https://api.github.com/search/repositories?q="${searchTerm}"`
-    ).then(data => {
-      console.log(data);
-
-      this.setState({ repositorios: data });
-    });
-  }
-
-  _get = async endpoint => {
-    const res = await fetch(endpoint);
-    const data = await res.json();
-    return data.items;
   };
 
-  _renderItem = ({ item }) => <CardRepositorio nome={item.name} />;
+  componentDidMount() {
+    this.getRepositorios();
+  }
+
+  _renderItem = ({ item }) => (
+    <CardRepositorio
+      nome={item.name}
+      descricao={item.description}
+      url={item.html_url}
+    />
+  );
 
   render() {
-    if (this.state.repositorios.length === 0) {
+    // Atribui os repositorios guardados em state para variavel responsavel de popular a lista
+    let filteredRepos = this.state.repositorios;
+    if (this.props.filtroString.length > 3) {
+      filteredRepos = filteredRepos.filter(val => {
+        return (
+          val.name
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .indexOf(
+              this.props.filtroString
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+            ) !== -1
+        );
+      });
+    }
+
+
+    if (this.state.repositorios.length === 0 && !this.state.erro) {
       return (
         <View style={styles.Loader}>
-          <ActivityIndicator size="large" color="#FFFFFF" />
+          <ActivityIndicator size="large" color="#f05a1a" />
+        </View>
+      );
+    } else if (this.state.erro) {
+      return (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', padding: 30}}>
+          <Text style={{marginBottom: 30, textAlign: 'center'}}>
+            Algo inesperado aconteceu. Verifique sua conexão com a Internet e
+            tente novamente!
+          </Text>
+          <Button
+            onPress={() => this.getRepositorios()}
+            title="Recarregar"
+            color="#f05a1a"
+          />
+        </View>
+      );
+    } else if (filteredRepos.length == 0) {
+      return (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', padding: 30}}>
+          <Icon name="emoticon-sad" size={60} color="#f05a1a" />
+          <Text style={{marginTop:20}}>Nenhum repositório foi encontrado</Text>
         </View>
       );
     }
     return (
-      <FlatList
-        style={{}}
-        data={this.state.repositorios}
-        keyExtractor={(repo, index) => index.toString()}
-        renderItem={this._renderItem}
-      />
+      <View>
+        <FlatList
+          data={filteredRepos}
+          keyExtractor={(repo, index) => repo.id.toString()}
+          renderItem={this._renderItem}
+        />
+      </View>
     );
   }
 }

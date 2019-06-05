@@ -1,24 +1,38 @@
 import React, { Component } from "react";
-import { Text, View, ImageBackground, TextInput } from "react-native";
-import { Input, Button, Avatar } from "react-native-elements";
+import { Text, View, ImageBackground } from "react-native";
+import { Input, Button } from "react-native-elements";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 export default class Login extends Component {
   email = "teste@teste.com";
-  senha = "teste";
+  senha = "teste123";
 
-  constructor(props) {
-    super(props);
-    this.state = { text: "", senha: "" };
+  constructor() {
+    super();
+    this.state = { email: "", senha: "" };
+  }
+
+  verificaAcesso(){
+    console.log(this.state.email, this.state.senha);
+    
+    let msgDeErro = 'E-mail ou senha inválidos, tente novamente! \n';
+    if(this.email == this.state.email && this.senha == this.state.senha ){
+      this.props.navigation.navigate("Repos")
+    } else { 
+      !this.state.email.includes("@") ? msgDeErro += 'O e-mail deve conter o caractere "@" ! \n' : '' ;
+      this.state.senha.length < 6 ? msgDeErro += 'A senha deve conter no mínimo 6 caracteres ! \n' : '' ;
+
+      alert(msgDeErro)
+    }
+
   }
 
   render() {
     return (
       <ImageBackground
-        source={{
-          uri:
-            "https://media.idownloadblog.com/wp-content/uploads/2019/03/WWDC-2019-iPhone-wallpaper-mock-up.jpg"
-        }}
+        source={
+          require("../assets/images/bgimg.jpg")
+        }
         style={{
           width: "100%",
           height: "100%",
@@ -47,7 +61,7 @@ export default class Login extends Component {
             containerStyle={{ marginVertical: 10 }}
             placeholder="Email"
             leftIcon={<Icon name="account" size={24} color="black" />}
-            onChangeText={text => this.setState({ text })}
+            onChangeText={email => this.setState({ email })}
             autoCompleteType="email"
           />
 
@@ -61,7 +75,7 @@ export default class Login extends Component {
           />
 
           <Button
-            onPress={() => this.props.navigation.navigate("Repos")}
+            onPress={() => this.verificaAcesso()}
             containerStyle={{
               backgroundColor: "#f05a1a",
               width: "100%",

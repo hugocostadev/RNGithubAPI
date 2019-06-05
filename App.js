@@ -21,7 +21,7 @@ const AppNavigator = createStackNavigator(
     
   },
   {
-    initialRouteName: "Repos",
+    initialRouteName: "Login",
     headerMode: "none"
   }
 );

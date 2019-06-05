@@ -1,23 +1,28 @@
 import React, { Component } from "react";
-import { Text, View, StyleSheet, TouchableNativeFeedback } from "react-native";
+import { Text, View, StyleSheet } from "react-native";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 export default class CardRepositorio extends Component {
-
   render() {
     return (
-      <TouchableNativeFeedback>
-        <View style={styles.Card} elevation={10}>
-          <View style={styles.CardHeader}>
-            <Text style={styles.CardHeader__NomeVendedor}>
-              {this.props.nome}
-            </Text>
-          </View>
-
-          <View style={styles.CardBody}>
-   
-          </View>
+      <View style={styles.Card} elevation={10}>
+        <View style={styles.CardHeader}>
+          <Text style={{color: 'black'}}>
+            <Icon name="github-circle" size={20} color="black" /> {this.props.nome}
+          </Text>
         </View>
-      </TouchableNativeFeedback>
+
+        <View style={styles.CardBody}>
+          <Text>
+            <Icon name="text" size={20} color="black" />{" "}
+            {this.props.descricao}
+          </Text>
+          <Text>
+            <Icon name="link-variant" size={20} color="black" />{" "}
+            {this.props.url}
+          </Text>
+        </View>
+      </View>
     );
   }
 }
@@ -46,41 +51,7 @@ const styles = StyleSheet.create({
     color: "#000"
   },
 
-  CardHeader__NomeVendedor: {
-    fontSize: 16,
-    color: "#000",
-    width: "85%"
-  },
-
-  CardHeader__Notificacao: {
-    fontSize: 25,
-    color: "#000"
-  },
-
   CardBody: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    flexWrap: "wrap",
-    padding: 5
-  },
-
-  CardItemStats: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 10
-  },
-
-  CardItemStats__Icon: {
-    fontSize: 30,
-    color: "#000"
-  },
-
-  CardItemStats__Value: {
-    fontSize: 16,
-    color: "#000"
-  },
-
-  CardItemStats__Text: {
-    fontSize: 14
+    padding: 10
   }
 });
